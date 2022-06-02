@@ -1,5 +1,6 @@
 package hello.servlet.basic;
 
+import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -16,16 +17,36 @@ public class HelloServlet extends HttpServlet {
      */
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        //super.service(req, resp);
         System.out.println("HelloServlet.service");
-        System.out.println("req = " + req);
-        System.out.println("resp = " + resp);
+        super.service(req, resp);
+//        System.out.println("req = " + req);
+//        System.out.println("resp = " + resp);
+//
+//        String username = req.getParameter("username");
+//        System.out.println("username = " + username);
+//
+//        resp.setContentType("text/plain");
+//        resp.setCharacterEncoding("utf-8");
+//        resp.getWriter().write("hello "+username); //http body에 데이터 삽입
+    }
 
-        String username = req.getParameter("username");
-        System.out.println("username = " + username);
+    @Override
+    public void init(ServletConfig config) throws ServletException {
+        System.out.println("HelloServlet.init");
+    }
 
-        resp.setContentType("text/plain");
-        resp.setCharacterEncoding("utf-8");
-        resp.getWriter().write("hello "+username); //http body에 데이터 삽입
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("HelloServlet.doGet");
+    }
+
+    @Override
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        System.out.println("HelloServlet.doPost");
+    }
+
+    @Override
+    public void destroy() {
+        System.out.println("HelloServlet.destroy");
     }
 }
