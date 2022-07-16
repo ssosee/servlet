@@ -21,7 +21,7 @@ HTML 코드 하나 수정해야 하는데, 수백줄의 자바 코드가 함께 
 
 ### *Model View Controller*
 <p align="center">
-    <img alt="img.png" src="MVC.png"/>
+    <img alt="img.png" src="src/main/resources/README-image/MVC.png"/>
 </p>
 
 **컨트롤러**
@@ -130,12 +130,12 @@ MVC 패턴을 적용한 덕분에 **컨트롤러의 역할과 뷰를 렌더링�
 단순하게 모델에서 피룡한 데이터를 꺼내고, 화면을 만들면 된다. <br>
 그런데 **컨트롤러는 딱봐도 중복이 많고, 필요하지 않는 코드**들도 많이 보인다.<br>
 
-*viewPaht에 중복*
+### *viewPaht에 중복*
 ```java
 String viewPath ="/WEB-INF/views/save-result.jsp";
 ```
 
-*포워드 중복*
+### *포워드 중복*
 
 ````java
     RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
@@ -146,7 +146,7 @@ String viewPath ="/WEB-INF/views/save-result.jsp";
 * prefix: `/WEB-INF/views`
 * suffix: `.jsp`
 
-*사용하지 않는 코드*
+### *사용하지 않는 코드*
 
 response는 현재 코드에서 사용되지 않는다.
 ```java
@@ -155,19 +155,88 @@ HttpServletRequest request, HttpServletResponse response
 `HttpServletRequest request`, `HttpServletResponse response`를 사용하는 코드는 테스트 케이스를 작성하기에도 어려움...
 
 
-*공통처리의 어려움*
+### *공통처리의 어려움*
 
 기능이 복잡해질수록 컨트롤러에서 공통으로 처리해야 하는 부분이 점점 더 많이 증가할 것이다.<br>
 단순히 공통 기능을 메서드로 뽑으면 될 것 같지만, 결과적으로 해당 메서드를 항상 호출 해야하고, 실수로 호출하지 않으면 문제가 발생!!<br>
 그리고 호출하는 것 자체도 중복..<br>
 
-*결론*
+### *결론*
 
 공통 처리가 어렵다!!<br>
 이 문제를 해결하기 위해서는 컨트롤러 호출 전에 먼저 공통 기능을 처리해야한다.<br>
 > 즉, **수문장 역할**을 하는 기능이 필요
 
 **프론트 컨트롤러(Front Controller)패턴**을 도입하면 이러한 문제를 깔끔하게 해결할 수 있다.
-> 입구를 하나로!<br><br>
-> <p align="center"><img alt="front-controller.png" src="front-controller.png"/></p>
+> 입구를 **하나**로!<br><br>
+> <p align="center"><img alt="front-controller.png" src="src/main/resources/README-image/front-controller.png"/></p>
 스프링 MVC의 핵심도 바로 이 **Front Controller**에 있다.
+
+# MVC 프레임워크 만들기
+## 프론트 컨트롤러 패턴 특징
+<p align="center">
+<img alt="img.png" src="src/main/resources/README-image/front-controller-pattern.png"/>
+</p>
+
+* 프론트 컨트롤러 서블릿 하나로 클라이언트의 요청을 받음
+* 프론트 컨트롤러가 요청에 맞는 컨트롤러를 찾아서 호출
+* 입구를 하나로!
+* 공통 처리 가능!!
+* 프론트 컨트롤러를 제외한 나머지 컨트롤러는 서블릿을 사용하지 않아도 된다.!
+
+> ### **스프링 웹 MVC와 프론트 컨트롤러**<br>
+> 
+> 스프링 웹 MVC의 핵심은 바로 FrontController이다.<br>
+> 스프링 웹 MVC의 `DispatcherServlet`이 `FrontController 패턴`으로 구현되어 있다.
+>
+
+#### ControllerV1
+<p>
+    <img alt="FrontControllerV1.png" src="FrontControllerV1.png"/>
+</p>
+V1 코드 참고
+
+#### ControllerV2
+<p>
+<img alt="FrontControllerV2.png" src="FrontControllerV2.png"/>
+</p>
+
+```java
+/**
+ * 기존 V1 Controller에서 했던 기능을
+ * MyView를 통해서 한다.
+ */
+public class MyView {
+    private String viewPath;
+
+    public MyView(String viewPath) {
+        this.viewPath = viewPath;
+    }
+
+    public void render(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        RequestDispatcher dispatcher = request.getRequestDispatcher(viewPath);
+        dispatcher.forward(request, response);
+    }
+}
+```
+
+#### ControllerV3
+> 이번 버전에는 컨트롤러에서 HttpServletRequest를 사용할 수 없다.
+> 따라서 직접 `request.setAttribute()`를 호출할 수도 없다.
+>
+> **즉 `Model`이 별도로 필요하다.**
+> 
+<p>
+<img alt="FrontControllerV3.png" src="FrontControllerV3.png">
+</p>
+
+**ModelView**<br>
+지금까지 컨트롤러에서 서블릿에 종속적인 HttpServletRequest를 사용했다. 
+그리고 Model도 `request.setAttribute()`를 통해 데이터를 저장하고 뷰에 전달했다.<br>
+서블릿의 종속성을 제거하기 위해 Model을 직접 만들고, 추가로 View이름까지 전달하는 객체를 만들어보자.
+
+
+
+#### ControllerV4
+
+#### ControllerV5
