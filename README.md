@@ -190,15 +190,15 @@ HttpServletRequest request, HttpServletResponse response
 > 스프링 웹 MVC의 `DispatcherServlet`이 `FrontController 패턴`으로 구현되어 있다.
 >
 
-#### ControllerV1
+### ControllerV1
 <p>
-    <img alt="FrontControllerV1.png" src="FrontControllerV1.png"/>
+    <img alt="FrontControllerV1.png" src="src/main/resources/README-image/FrontControllerV1.png"/>
 </p>
 V1 코드 참고
 
-#### ControllerV2
+### ControllerV2
 <p>
-<img alt="FrontControllerV2.png" src="FrontControllerV2.png"/>
+<img alt="FrontControllerV2.png" src="src/main/resources/README-image/FrontControllerV2.png"/>
 </p>
 
 ```java
@@ -220,14 +220,14 @@ public class MyView {
 }
 ```
 
-#### ControllerV3
+### ControllerV3
 > 이번 버전에는 컨트롤러에서 HttpServletRequest를 사용할 수 없다.
 > 따라서 직접 `request.setAttribute()`를 호출할 수도 없다.
 >
 > **즉 `Model`이 별도로 필요하다.**
 > 
 <p>
-<img alt="FrontControllerV3.png" src="FrontControllerV3.png">
+<img alt="FrontControllerV3.png" src="src/main/resources/README-image/FrontControllerV3.png">
 </p>
 
 **ModelView**<br>
@@ -236,7 +236,37 @@ public class MyView {
 서블릿의 종속성을 제거하기 위해 Model을 직접 만들고, 추가로 View이름까지 전달하는 객체를 만들어보자.
 
 
+### ControllerV4
+#### *좋은 프레임워크란*
+V3 컨트롤러는 서블릿 종속성을 제거하고 뷰 경로의 중복을 제거하는 등, 잘 설계된 컨트롤러이다.<br>
+그런데 실제 컨트롤러 인터페이스를 구현하는 개발자 입장에서 보면,<br>
+항상 `ModelView`객체를 생성하고 반환해야 하는 부분이 번거롭다.<br>
+**좋은 프레임워크란** `아무리 아키텍처가 좋아도 개발자들에게 단순하고 실용적`이여야 한다.
+<p>
+<img alt="FrontControllerV4.png" src="src/main/resources/README-image/FrontControllerV4.png"/>
+</p>
 
-#### ControllerV4
+기본적인 구조는 V3와 같다. 대신 컨트롤러가 `ModelView`를 반환하지 않고, `ViewName`만 반환한다.<br><br>
+이번 버전은 `ModelView`가 없다.<br>
+`model`객체는 파라미터로 전달되기 때문에 그냥 사용하면 되고, 그 결과로 뷰의 이름만 반환하면 된다.<br>
 
-#### ControllerV5
+### ControllerV5
+ControllerV3를 지원하는 어댑터를 구현해보자.
+#### *어댑터 패턴*
+지금까지 개발한 프론트 컨트롤러는 한가지 방식의 컨트롤러 인터페이스만 사용할 수 있다.<br>
+`ControllerV3`, `ControllerV4`는 완전히 다른 인터페이스이다. 따라서 호한이 불가하다.!<br>
+마치 V3는 110V, V4는 220V 콘센트 같은 것이다.<br>
+이때 사용하는 것이 바로 어댑터이다.!!<br>
+<p>
+<img alt="FrontControllerV5.png" src="src/main/resources/README-image/FrontControllerV5.png"/>
+</p>
+
+**핸들러 어댑터**
+* 중간에 어탭터 역할을 하는 어댑터가 추가되었는데 이름이 핸들러 어탭터이다.
+* 어탭터 역할을 해주는 덕분에 다양한 종류의 컨트롤러를 호출할 수 있다.
+
+**핸들러**
+* 컨트롤러의 이름을 더 넓은 위인 핸들러로 변경
+* 어댑터가 있기 때문에 꼭 컨트롤러의 개념 뿐만 아니라 어떠한 것이든 해당하는 종류의 어댑터만 있으면 전부 처리 가능하기 때문
+
+## 정리
