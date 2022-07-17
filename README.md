@@ -270,3 +270,98 @@ ControllerV3를 지원하는 어댑터를 구현해보자.
 * 어댑터가 있기 때문에 꼭 컨트롤러의 개념 뿐만 아니라 어떠한 것이든 해당하는 종류의 어댑터만 있으면 전부 처리 가능하기 때문
 
 ## 정리
+* V1
+  * 기존 구조를 최대한 유지하면서 `프론트 컨트롤러` 도입
+* V2
+  * 단순 반복 되는 `뷰 로직` 분리
+* V3
+  * `서블릿` 종속성 제거
+  * `뷰 이름` 중복 제거
+* V4
+  * V3와 거의 비슷
+  * 구현 입장에서 `ModelView`를 직접 생성해서 반환하지 않도록 편리한 인터페이스 제공
+* V5
+  * `어댑터` 도입
+  * 어댑터를 추가해서 프레임워크를 유연하고 확장성 있게 설계
+
+## 스프링 MVC
+### 스프링 MVC 전체 구조
+**우리가 만든 MVC**
+<p>
+<img alt="MyMVC.png" src="src/main/resources/README-image/MyMVC.png"/>
+</p>
+
+**스프링 MVC**
+<p>
+<img alt="SpringMVC.png" src="src/main/resources/README-image/SpringMVC.png"/><br><br>
+<img alt="SpringMVCDiagram.png" src="src/main/resources/README-image/SpringMVCDiagram.png"/>
+</p>
+
+#### *비교*
+* `FrontController` -> `DispatcherServlet`
+* `handlerMappingMap` -> `HandlerMapping`
+* `MyHandlerAdapter` -> `HandlerAdapter`
+* `ModelView` -> `ModelAndView`
+* `viewResolver` -> `ViewResolver`
+* `MyView` -> `View`
+
+#### *동작 순서*
+1. **핸들러 조회**: 핸들러 매핑을 통해 요청 URL에 매핑된 핸들러(컨트롤러)를 조회
+2. **핸들러 어댑터 조회**: 핸들러를 실행할 수 있는 핸들러 어댑터 조회
+3. **핸들러 어댑터 실행**: 핸들러 어댑터 실행
+4. **핸들러 실행**: 핸들러 어댑터가 실제 핸들러 실행
+5. **ModelAndView 어댑터 반환**: 핸들러 어댑터는 핸들러가 반환하는 정보를 ModelAndVie로 변환해서 반환
+6. **viewResolver 호출**: 뷰 리졸버를 찾고 실행
+7. **View 반환**: 뷰 리졸버는 뷰의 논리 이름을 물리 이름으로 바꾸고, 렌더링 역할을 담당하는 뷰 객체를 반환
+8. **뷰 렌더링**: 뷰를 통해서 뷰를 렌더링
+
+#### *인터페이스 살펴보기*
+* **스프링 MVC의 가장 큰 장점**은 `DispatcherServlet` 코드의 변경 없이, 원하는 기능을 변경하거나 확장할 수 있다는 점!(대부분 인터페이스로 제공)
+* 인터페이스들만 구현해서 `DispatcherServlet`에 등록하면 자신만의 컨트롤러를 개발 할 수 있다. 
+
+#### *주요 인터페이스 목록*
+* 핸들러 매핑: `org.springframework.web.servlet.HandlerMapping`
+* 핸들러 어댑터: `org.springframework.web.servlet.HandlerAdapter`
+* 뷰 리졸버: `org.springframework.web.servlet.ViewResolver`
+* 뷰: `org.springframework.web.servlet.View`
+
+```java
+protected void doDispatch(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        HttpServletRequest processedRequest = request;
+        HandlerExecutionChain mappedHandler = null;
+        ModelAndView mv = null;
+        // 1. 핸들러 조회
+        mappedHandler = getHandler(processedRequest);
+        if (mappedHandler == null) {
+        noHandlerFound(processedRequest, response);
+        return;
+        }
+        // 2. 핸들러 어댑터 조회 - 핸들러를 처리할 수 있는 어댑터
+        HandlerAdapter ha = getHandlerAdapter(mappedHandler.getHandler());
+        // 3. 핸들러 어댑터 실행 -> 4. 핸들러 어댑터를 통해 핸들러 실행 -> 5. ModelAndView 반환
+        mv = ha.handle(processedRequest, response, mappedHandler.getHandler());
+        processDispatchResult(processedRequest, response, mappedHandler, mv,
+        dispatchException);
+}
+```
+```java
+private void processDispatchResult(HttpServletRequest request, HttpServletResponse response, HandlerExecutionChain mappedHandler, ModelAndView mv, Exception exception) throws Exception {
+        // 뷰 렌더링 호출
+        render(mv, request, response);
+}
+```
+```java
+protected void render(ModelAndView mv, HttpServletRequest request, HttpServletResponse response) throws Exception {
+        
+        View view;
+        String viewName = mv.getViewName();
+        
+        // 6. 뷰 리졸버를 통해서 뷰 찾기, 7. View 반환
+        view = resolveViewName(viewName, mv.getModelInternal(), locale, request);
+        
+        // 8. 뷰 렌더링
+        view.render(mv.getModelInternal(), request, response);
+}
+```
+
+### 
