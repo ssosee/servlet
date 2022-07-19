@@ -306,6 +306,7 @@ ControllerV3를 지원하는 어댑터를 구현해보자.
 * `MyView` -> `View`
 
 #### *동작 순서*
+ *1, 2가 핵심!!!!!!*
 1. **핸들러 조회**: 핸들러 매핑을 통해 요청 URL에 매핑된 핸들러(컨트롤러)를 조회
 2. **핸들러 어댑터 조회**: 핸들러를 실행할 수 있는 핸들러 어댑터 조회
 3. **핸들러 어댑터 실행**: 핸들러 어댑터 실행
@@ -317,7 +318,7 @@ ControllerV3를 지원하는 어댑터를 구현해보자.
 
 #### *인터페이스 살펴보기*
 * **스프링 MVC의 가장 큰 장점**은 `DispatcherServlet` 코드의 변경 없이, 원하는 기능을 변경하거나 확장할 수 있다는 점!(대부분 인터페이스로 제공)
-* 인터페이스들만 구현해서 `DispatcherServlet`에 등록하면 자신만의 컨트롤러를 개발 할 수 있다. 
+* 인터페이스들만 구현해서 `DispatcherServlet`에 등록하면 **자신만의 컨트롤러를 개발** 할 수 있다. 
 
 #### *주요 인터페이스 목록*
 * 핸들러 매핑: `org.springframework.web.servlet.HandlerMapping`
@@ -364,4 +365,4 @@ protected void render(ModelAndView mv, HttpServletRequest request, HttpServletRe
 }
 ```
 
-### 
+
